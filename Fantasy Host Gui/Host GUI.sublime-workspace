@@ -1,0 +1,206 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "from tkinter import *\nimport tkinter.scrolledtext as scrolledtext\nfrom tkinter.constants import BOTH\nfrom PIL import ImageTk, Image\nimport json\nimport os\nimport requests\n\nroot = Tk()\nroot.title(\"Fantasy Raider Host\")\nroot.geometry(\"1035x620\")\nroot.iconbitmap('imgs/fr_icon.ico')\n\ndef edit():\n    top = Toplevel()\n    top.title(\"Edit Team\")\n    top.geometry(\"300x200\")\n    top.iconbitmap('imgs/fr_icon.ico')\n\n    lable_wteam = Label(top, text=\"Which team to edit?\")\n    lable_wteam.grid(row=0, column=0)\n    team_en = Entry(top, width=5)\n    team_en.grid(row=1, column=0)\n\n    lable_rem = Label(top, text=\"Name to remove\")\n    lable_rem.grid(row=2, column=0)\n    rem_en = Entry(top, width=30)\n    rem_en.grid(row=3, column=0, padx=10)\n\n    lable_ad = Label(top, text=\"Name to add\")\n    lable_ad.grid(row=4, column=0)\n    ad_en = Entry(top, width=30)\n    ad_en.grid(row=5, column=0)\n\n    def change():\n        remove_p = rem_en.get()\n        add_p = ad_en.get()\n        ed_team = int(team_en.get())\n\n        label_rem = Label(top, text=remove_p)\n        label_rem.grid(row=7, column=0)\n\n        label_ad = Label(top, text=add_p)\n        label_ad.grid(row=8, column=0)\n\n        directory = os.path.dirname(__file__)\n        filename = os.path.join(directory, \"player_roster.json\")\n\n        with open(filename, 'r', encoding=\"utf-8\") as fin:\n            temp_roster = json.load(fin)\n        temp_roster_new = [add_p if x == remove_p else x for x in temp_roster[ed_team - 1]]\n        temp_roster[ed_team - 1] = temp_roster_new\n\n        with open(filename, 'w', encoding=\"utf-8\") as fout:\n            json.dump(temp_roster, fout)\n        top.destroy()\n\n    confirm_button = Button(top, text=\"Commit\", command=change)\n    confirm_button.grid(row=6, column=0, pady=10)\n\n\ndef add_team():\n    top1 = Toplevel()\n    top1.title(\"Add a Team\")\n    top1.geometry(\"300x300\")\n    top1.iconbitmap('imgs/fr_icon.ico')\n\n    label_p1 = Label(top1, text=\"Raider 1\")\n    label_p1.grid(row=0, column=0, sticky=\"N\")\n    p1_en = Entry(top1, width=30)\n    p1_en.grid(row=1, column=0, padx=10)\n\n    label_p2 = Label(top1, text=\"Raider 2\")\n    label_p2.grid(row=2, column=0)\n    p2_en = Entry(top1, width=30)\n    p2_en.grid(row=3, column=0)\n\n    label_p3 = Label(top1, text=\"Raider 3\")\n    label_p3.grid(row=4, column=0)\n    p3_en = Entry(top1, width=30)\n    p3_en.grid(row=5, column=0)\n\n    label_p4 = Label(top1, text=\"Raider 4\")\n    label_p4.grid(row=6, column=0)\n    p4_en = Entry(top1, width=30)\n    p4_en.grid(row=7, column=0)\n\n    label_p5 = Label(top1, text=\"Raider 5\")\n    label_p5.grid(row=8, column=0)\n    p5_en = Entry(top1, width=30)\n    p5_en.grid(row=9, column=0)\n\n    def add():\n        p1 = p1_en.get()\n        p2 = p2_en.get()\n        p3 = p3_en.get()\n        p4 = p4_en.get()\n        p5 = p5_en.get()\n\n        tempteam = []\n        tempteam.append(p1)\n        tempteam.append(p2)\n        tempteam.append(p3)\n        tempteam.append(p4)\n        tempteam.append(p5)\n\n        with open(\"player_roster.json\", 'r', encoding=\"utf-8\") as fina:\n            old = json.load(fina)\n        old.append(tempteam)\n\n        with open(\"player_roster.json\", 'w', encoding=\"utf-8\") as fouta:\n            json.dump(old, fouta)\n        top1.destroy()\n\n    button_add = Button(top1, text=\"Add team\", command=add)\n    button_add.grid(row=10, column=0, pady=20)\n\n\ndef remove_team():\n    top2 = Toplevel()\n    top2.title(\"Remove Team\")\n    top2.geometry(\"220x110\")\n    top2.iconbitmap('imgs/fr_icon.ico')\n\n    team_rem_label = Label(top2, text=\"Which number team to remove?\")\n    team_rem_label.grid(row=0, column=0)\n\n    team_rem_en = Entry(top2, width=\"5\")\n    team_rem_en.grid(row=1, column=0)\n\n    def remove():\n        team_nun = int(team_rem_en.get()) - 1\n        with open(\"player_roster.json\", 'r', encoding=\"utf-8\") as finr:\n            remove_team = json.load(finr)\n\n        del remove_team[team_nun]\n\n        with open(\"player_roster.json\", 'w', encoding=\"utf-8\") as foutr:\n            json.dump(remove_team, foutr)\n        top2.destroy()\n\n    remove_button = Button(top2, text=\"Remove\", command=remove)\n    remove_button.grid(row=2, column=0, pady=10)\n\n\nimg_frame = Frame(root)\nimg_frame.grid(row=0, rowspan=4, column=3, columnspan=4, sticky=\"w\", padx=200)\n\nroster_frame = Frame(root)\nroster_frame.grid(row=0, column=0, sticky=\"n\", columnspan=3)\nlabel_text = \"Your Teams\"\nroster_label = Label(roster_frame, text=label_text)\nroster_label.pack()\n\nwith open(\"player_roster.json\", 'r', encoding=\"utf-8\") as fin:\n    roster = json.load(fin)\n\nroster_text = scrolledtext.ScrolledText(roster_frame, undo=True, height=20, width=80, bg=\"Grey\")\nroster_text.pack(expand=False, fill=BOTH)\n\nfor r in range(len(roster)):\n    team = list(roster[r])\n    roster_text.insert(INSERT, f\"{r + 1}: {team}\\n\")\nroster_text.configure(state=\"disabled\")\n\n\ndef refresh():\n    with open(\"player_roster.json\", 'r', encoding=\"utf-8\") as fin:\n        roster = json.load(fin)\n\n    roster_text.configure(state=\"normal\")\n    roster_text.delete(\"1.0\", \"end\")\n    for r in range(len(roster)):\n        team = list(roster[r])\n        roster_text.insert(INSERT, f\"{r + 1}: {team}\\n\")\n    roster_text.configure(state=\"disabled\")\n\n\ndef parse():\n    top3 = Toplevel()\n    top3.title(\"Parse Results\")\n    top3.geometry(\"1100x300\")\n\n    parse_text = scrolledtext.ScrolledText(top3, undo=True, height=20, width=80, bg=\"black\", fg=\"White\", state=\"normal\")\n    parse_text.pack(expand=False, fill=BOTH)\n    parse_text.tag_config(\"red\", foreground=\"RED\")\n    parse_text.tag_config(\"white\", foreground=\"White\")\n\n    server = server_en.get()\n    raid = rid.get()\n    region = reg.get()\n\n    avg_tot = []\n    with open(\"player_roster.json\", 'r', encoding=\"utf-8\") as finp:\n        roster_parse = json.load(finp)\n    for i in range(len(roster_parse)):\n        for n in roster_parse[i]:\n            url = \"https://classic.warcraftlogs.com:443/v1/parses/character/\" + n + \\\n                  \"/\" + server + \"/\" + region + \"?zone=\" + raid + \"metric=dps&compare=0&api_key=6796996434cf246743f73accbf1c85ce\"\n\n            url_obj = requests.get(url)\n            parse_data = url_obj.json()\n            percent_per_char = []\n            encount_prev = None\n\n            if len(parse_data) == 0:\n                url = \"https://classic.warcraftlogs.com:443/v1/parses/character/\" + n + \\\n                      \"/\" + server + \"/\" + region + \"?zone=\" + raid + \"metric=dps&compare=0&partition=4&api_key=6796996434cf246743f73accbf1c85ce\"\n                url_obj = requests.get(url)\n                parse_data = url_obj.json()\n                if len(parse_data) == 0:\n                    parse_text.insert(INSERT, \"Invalid character name or character has no recent parses for this raid\")\n                    break\n\n            for x in range(len(parse_data)):\n                encount_cur = json.dumps(parse_data[x]['encounterName'])\n                if encount_prev == encount_cur:\n                    parse_data_cur = json.dumps(parse_data[x]['percentile'])\n                    parse_data_prev = json.dumps(parse_data[x - 1]['percentile'])\n                    encount_prev = encount_cur\n                    if parse_data_cur >= parse_data_prev:\n                        percent_per_char[len(percent_per_char) - 1] = float(parse_data_cur)\n                    else:\n                        continue\n                else:\n                    parse_data_cur = json.dumps(parse_data[x]['percentile'])\n                    percent_per_char.append(float(parse_data_cur))\n                    encount_prev = encount_cur\n            total = sum(percent_per_char)\n            aver_len = len(percent_per_char)\n            aver = total / aver_len\n            avg_tot.append(aver)\n            parse_text.configure(state=\"normal\")\n            parse_text.insert(INSERT, f\"{n}'s average is : {aver}\\n\")\n        parse_text.configure(state=\"normal\")\n        parse_text.insert(INSERT, \" \\n\")\n\n        team_tot = int(sum(avg_tot))\n        team_tot_av = team_tot / 5\n\n        parse_text.configure(state=\"normal\")\n        parse_text.insert(INSERT, f\"Team {i + 1}'s total points this week are {team_tot_av}\\n\", \"red\")\n\n        parse_text.insert(INSERT, \"================================================\\n\", \"white\")\n        parse_text.configure(state=\"disabled\")\n\n        avg_tot.clear()\n\n\nbutton_frame = Frame(roster_frame)\nbutton_frame.pack(anchor=\"e\")\n\nbutton_refresh = Button(button_frame, text=\"Refresh Roster\", command=refresh, width=13)\nbutton_refresh.grid(row=0, column=0, pady=10, sticky=\"w\")\n\nbutton_edit = Button(button_frame, text=\"Edit\", command=edit, width=10)\nbutton_edit.grid(row=0, column=1, padx=10, pady=10, sticky=\"e\")\n\nbutton_addteam = Button(button_frame, text=\"Add Team\", command=add_team, width=10)\nbutton_addteam.grid(row=0, column=2, sticky=\"e\")\n\nbutton_removeteam = Button(button_frame, text=\"Remove Team\", command=remove_team, width=12)\nbutton_removeteam.grid(row=0, column=3, padx=10, sticky=\"e\")\n\noptions_frame = Frame(root, relief=SUNKEN, borderwidth=1)\noptions_frame.grid(row=1, column=0, sticky=\"sw\", pady=30, )\n\nparse_label = Label(root, text=\"Parse can take a while, its not frozen\")\nparse_label.grid(row=1, column=1, sticky=\"w\", padx=10)\n\nparse_button = Button(root, text=\"Parse\", width=15, height=10, bg=\"Green\", font=\"Courier\", command=parse)\nparse_button.grid(row=1, column=2, sticky=\"w\")\n\nraid_label = Label(options_frame, text=\"Select Raid\\n\")\nraid_label.grid(row=0, column=0, )\n\nrid = StringVar()\nrid.set(\"1002\")\n\nreg = StringVar()\nreg.set(\"US\")\nRadiobutton(options_frame, text=\"Molten Core\", variable=rid, value=1000).grid(row=1, column=0, sticky=\"w\")\nRadiobutton(options_frame, text=\"Onyxia\", variable=rid, value=1001).grid(row=2, column=0, sticky=\"w\")\nRadiobutton(options_frame, text=\"Blackwing Lair\", variable=rid, value=1002).grid(row=3, column=0, sticky=\"w\")\nRadiobutton(options_frame, text=\"Zuul'Gurub\", variable=rid, value=1003).grid(row=4, column=0, sticky=\"w\")\nRadiobutton(options_frame, text=\"AQ20\", variable=rid, value=1004).grid(row=5, column=0, sticky=\"w\")\nRadiobutton(options_frame, text=\"AQ40\", variable=rid, value=1005).grid(row=6, column=0, sticky=\"w\")\n\nRadiobutton(options_frame, text=\"US\", variable=reg, value=\"US\").grid(row=3, column=1)\nRadiobutton(options_frame, text=\"EU\", variable=reg, value=\"EU\").grid(row=4, column=1)\n\nserver_label = Label(options_frame, text=\"Server:\")\nserver_label.grid(row=1, column=1)\n\nserver_en = Entry(options_frame)\nserver_en.grid(row=2, column=1, padx=40)\nserver_en.insert(0, \"Atiesh\")\n\nlogo_img = ImageTk.PhotoImage(Image.open(\"imgs/Logo.png\"))\n\nlogo_label = Label(img_frame, image=logo_img)\nlogo_label.grid(row=0, column=0, stick=\"w\")\n\nroot.mainloop()\n",
+			"file": "Host GUI.py",
+			"file_size": 10932,
+			"file_write_time": 132419200740837309,
+			"settings":
+			{
+				"buffer_size": 10628,
+				"line_ending": "Windows"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+	],
+	"find":
+	{
+		"height": 0.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "Host GUI.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10628,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10628,
+								10628
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4829.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "Host GUI.sublime-project",
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

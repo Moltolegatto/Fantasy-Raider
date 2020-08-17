@@ -1,0 +1,3 @@
+Pillow
+requests
+cx_Freeze
