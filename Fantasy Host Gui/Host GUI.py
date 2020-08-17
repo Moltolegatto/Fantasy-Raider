@@ -11,6 +11,7 @@ root.title("Fantasy Raider Host")
 root.geometry("1035x620")
 root.iconbitmap('imgs/fr_icon.ico')
 
+#Edit button for changing players within a team
 def edit():
     top = Toplevel()
     top.title("Edit Team")
@@ -32,6 +33,7 @@ def edit():
     ad_en = Entry(top, width=30)
     ad_en.grid(row=5, column=0)
 
+    #Commits the changes made from the edit function
     def change():
         remove_p = rem_en.get()
         add_p = ad_en.get()
@@ -58,7 +60,7 @@ def edit():
     confirm_button = Button(top, text="Commit", command=change)
     confirm_button.grid(row=6, column=0, pady=10)
 
-
+#Adds a new team to the "player roster" json
 def add_team():
     top1 = Toplevel()
     top1.title("Add a Team")
@@ -90,6 +92,7 @@ def add_team():
     p5_en = Entry(top1, width=30)
     p5_en.grid(row=9, column=0)
 
+    #Commits the changes made with the add function
     def add():
         p1 = p1_en.get()
         p2 = p2_en.get()
@@ -115,7 +118,7 @@ def add_team():
     button_add = Button(top1, text="Add team", command=add)
     button_add.grid(row=10, column=0, pady=20)
 
-
+#Removes a team from the "player roster" json
 def remove_team():
     top2 = Toplevel()
     top2.title("Remove Team")
@@ -128,6 +131,8 @@ def remove_team():
     team_rem_en = Entry(top2, width="5")
     team_rem_en.grid(row=1, column=0)
 
+
+    #Commits the changes made from the remove_team function
     def remove():
         team_nun = int(team_rem_en.get()) - 1
         with open("player_roster.json", 'r', encoding="utf-8") as finr:
@@ -146,6 +151,7 @@ def remove_team():
 img_frame = Frame(root)
 img_frame.grid(row=0, rowspan=4, column=3, columnspan=4, sticky="w", padx=200)
 
+#Creates a frame to display the roster gotten from "player roster" json
 roster_frame = Frame(root)
 roster_frame.grid(row=0, column=0, sticky="n", columnspan=3)
 label_text = "Your Teams"
@@ -163,7 +169,7 @@ for r in range(len(roster)):
     roster_text.insert(INSERT, f"{r + 1}: {team}\n")
 roster_text.configure(state="disabled")
 
-
+# Refreshes the roster frame with any changes made with edit/add/remove functions
 def refresh():
     with open("player_roster.json", 'r', encoding="utf-8") as fin:
         roster = json.load(fin)
@@ -175,7 +181,7 @@ def refresh():
         roster_text.insert(INSERT, f"{r + 1}: {team}\n")
     roster_text.configure(state="disabled")
 
-
+# Gets the logs from Warcraftlogs for the player roster
 def parse():
     top3 = Toplevel()
     top3.title("Parse Results")
@@ -186,32 +192,41 @@ def parse():
     parse_text.tag_config("red", foreground="RED")
     parse_text.tag_config("white", foreground="White")
 
+    # Gets the parse perameters from the main window
     server = server_en.get()
     raid = rid.get()
     region = reg.get()
 
     avg_tot = []
+
+    
     with open("player_roster.json", 'r', encoding="utf-8") as finp:
         roster_parse = json.load(finp)
+
+
+    #Cycles through each team in the "player roster" json  
     for i in range(len(roster_parse)):
+        #Cycles through each player in a team
         for n in roster_parse[i]:
             url = "https://classic.warcraftlogs.com:443/v1/parses/character/" + n + \
                   "/" + server + "/" + region + "?zone=" + raid + "metric=dps&compare=0&api_key=6796996434cf246743f73accbf1c85ce"
-
+            #Creates the api url and fetches the api data, saving it to a json
             url_obj = requests.get(url)
             parse_data = url_obj.json()
             percent_per_char = []
             encount_prev = None
 
+            #Checks if there is a valid log for given raid and character, if not then checks for p5 no world buffs logs
             if len(parse_data) == 0:
                 url = "https://classic.warcraftlogs.com:443/v1/parses/character/" + n + \
                       "/" + server + "/" + region + "?zone=" + raid + "metric=dps&compare=0&partition=4&api_key=6796996434cf246743f73accbf1c85ce"
                 url_obj = requests.get(url)
                 parse_data = url_obj.json()
+                #If no p5 no world buff logs, then returns a message informing user
                 if len(parse_data) == 0:
                     parse_text.insert(INSERT, "Invalid character name or character has no recent parses for this raid")
                     break
-
+            #Checks for duplicate boss entries and takes only the highest percentile parse data        
             for x in range(len(parse_data)):
                 encount_cur = json.dumps(parse_data[x]['encounterName'])
                 if encount_prev == encount_cur:
@@ -226,6 +241,8 @@ def parse():
                     parse_data_cur = json.dumps(parse_data[x]['percentile'])
                     percent_per_char.append(float(parse_data_cur))
                     encount_prev = encount_cur
+
+            #Creates a score based on averages of parse data        
             total = sum(percent_per_char)
             aver_len = len(percent_per_char)
             aver = total / aver_len
@@ -246,7 +263,7 @@ def parse():
 
         avg_tot.clear()
 
-
+#Button positioning
 button_frame = Frame(roster_frame)
 button_frame.pack(anchor="e")
 
